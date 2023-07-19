@@ -2,8 +2,11 @@ import time
 import subprocess
 from configparser import ConfigParser
 from mpod_library import mpodPsu
-import influxdb as ifd
+#import influxdb as ifd
 import sys
+# InfluxDB required packages
+from influxdb import InfluxDBClient
+from datetime import datetime
 
 """
 sudo apt-get install snmp-mibs-downloader
@@ -35,20 +38,34 @@ if __name__ == "__main__":
 	
 		# initialize MPOD class
 		mpod = mpodPsu(['192.168.196.6','192.168.196.7'])
+
+		######################################################
+		"""
+		RV 07.18.2023
+		"""
+		# Initialize InfluxDB client
+		client = InfluxDBClient('localhost', 8086, 'MPODs')
+		client.create_database('MPODs')
+		client.switch_database('MPODs')
+		######################################################
 	
 		def validate_mpodn(TTIn):
 			if TTIn == 0 or TTIn == 1:
 				return TTIn, True
 			else:
 			        return TTIn, False
-	
-		mpodn = int(input("What MPOD would you like to control (0,1) "))
+		print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+		mpodn = int(input("What MPOD would you like to control? (insert number only) \n - MPOD 0 \n - MPOD 1 \n Answer:  "))
 		while validate_mpodn(mpodn)[1] == False:
 			print(validate_mpodn(mpodn))
 			mpodn = int(input("What MPOD would you like to control (0,1) "))
  	
 		mpod.mpodSwitch(mpodn,1)
+
+		# At this point we write the log file
 		mpod.write_log()
+
+
 		# List of various channels and names 
 		channels = [".u0", ".u1", ".u2", ".u3", ".u100", ".u101", ".u102", ".u103", ".u104", ".u105", ".u106", ".u107", ".u200", ".u201", ".u202", ".u203", ".u204", ".u205", ".u206", ".u207"]
 		light_channels = [".u200",".u201",".u202",".u203"]
@@ -76,6 +93,7 @@ if __name__ == "__main__":
 				return string, False
 		# Validates the user input for controlling the measurement or setting procedures
 		def mos_is_valid(string):
+			'''
 			if string == "view" or string == "VIEW" or string == "v":
 				string = "View"
 			elif string == "CONFIGURE" or string == "configure" or string == "c":
@@ -85,9 +103,34 @@ if __name__ == "__main__":
 			else:
 				print("Invalid input, valid inputs include View and Configure")
 				return string, False
+			'''
+			######################################################
+			"""
+			RV 07.18.2023
+			"""
+			actions = {
+				'monitor': 'Monitor',
+				'view' : 'View',
+				'configure' : 'Configure'
+			}
+			normalized_input = string.lower()
+			first_letters = [key[0].lower() for key in actions] 	
+			if normalized_input in actions:
+				string = actions[normalized_input] 
+				return string, True
+			elif normalized_input[0] in first_letters:
+				index = first_letters.index(normalized_input[0])
+				string = list(actions.items())[index][1]
+				return string, True
+			else:
+				print("Invalid input.")
+				return string, False
+			######################################################
+
 	
 		# Validates the user input for controlling what systems to turn on with MPODs
 		def CONTROL_is_valid(string):
+			'''
 			if string == "charge" or string == "CHARGE" or string == "c" or string == "C":
 				string = "Charge"
 			elif string == "light" or string == "LIGHT" or string == "l" or string == "L":
@@ -101,36 +144,68 @@ if __name__ == "__main__":
 			else:
 				print("Invalid input, valid inputs are Charge, Light, Rtd, or All")
 				return string, False
+			'''
+			######################################################
+			"""
+			RV 07.18.2023
+			"""
+			actions = {
+				'charge': 'Charge',
+				'light' : 'Light',
+				'rtd' : 'Rtd',
+				'all' : 'All'
+			}
+			normalized_input = string.lower()
+			first_letters = [key[0].lower() for key in actions] 	
+			if normalized_input in actions:
+				string = actions[normalized_input] 
+				return string, True
+			elif normalized_input[0] in first_letters:
+				index = first_letters.index(normalized_input[0])
+				string = list(actions.items())[index][1]
+				return string, True
+			else:
+				print("Invalid input.")
+				return string, False
+			######################################################
+			
 		# Gathers input regarding what systems to power
-		powering = input("What would you like to control (Charge,Light,Rtd,All)? ")
+		print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+		#powering = input("What would you like to control (Charge,Light,Rtd,All)? ")
+		powering = input("What would you like to control? \n - Charge \n - Light \n - Rtd \n - All \n Answer: ")
 		validation = CONTROL_is_valid(powering)
 		powering = validation[0]
 		valid = validation[1]
 		while valid == False:
-			powering = input("What would you like to control (Charge,Light,Rtd,All)? ")
+			print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+			#powering = input("What would you like to control (Charge,Light,Rtd,All)? ")
+			powering = input("What would you like to control? \n - Charge \n - Light \n - Rtd \n - All \n Answer: ")
 			validation = CONTROL_is_valid(powering)
 			powering = validation[0]
 			valid = validation[1]
 		
 		# Gathers input regarding setting or measureing
-		measureorset = input("Would you like to View or Configure channels? ")
+		print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+		measureorset = input("What would you like to do? \n - Monitor \n - View \n - Configure \n Answer: ")
 		validation = mos_is_valid(measureorset)
 		measureorset = validation[0]
 		valid = validation[1]
 		while valid == False:	
-			measureorset = input("Would you like to View or Configure channels? ")
+			measureorset = input("What would you like to do? \n - Monitor \n - View \n - Configure \n Answer: ")
 			validation = mos_is_valid(measureorset)
 			measureorset = validation[0]
 			valid = validation[1]
 		
 		# If the user wants to set power supplies it gets an on/off input
 		if measureorset == "Configure":
-			ONOFF = input("Are you turning on or off the power? ")
+			print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+			ONOFF = input("Are you turning ON or OFF the power? \n Answer: ")
 			validation = ONOFF_is_valid(ONOFF)
 			ONOFF = validation[0]
 			valid = validation[1]
 			while valid == False:
-				ONOFF = input("Are you turning ON or OFF the power? ")
+				print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+				ONOFF = input("Are you turning ON or OFF the power? \n Answer: ")
 				validation = ONOFF_is_valid(ONOFF)
 				ONOFF = validation[0]
 				valid = validation[1]
@@ -151,12 +226,12 @@ if __name__ == "__main__":
 					mpod.VGA_34_pos_off(mpodn)
 					mpod.VGA_34_neg_off(mpodn)
 					mpod.write_log()
-				turn_off = input("Would you like to power off the MPOD crate? ")
+				turn_off = input("Would you like to power OFF the MPOD crate? \n Answer: ")
 				if turn_off == "y" or "Y" or "yes" or "Yes" or "YES":
 					mpod.mpodSwitch(mpodn,0)
-					print("MPOD is now off")
+					print("MPOD is now OFF")
 				else:
-					print("MPOD is stil on")
+					print("MPOD is stil ON")
 	
 			# Measures
 			if measureorset == "View":
@@ -166,7 +241,23 @@ if __name__ == "__main__":
 				print(data[1][0], 'V \t', data[1][1], 'V \t', data[1][2], 'V \t', data[1][3], 'V')
 				print(data[2][0], 'I \t', data[2][1], 'I \t', data[2][2], 'I \t', data[2][3], 'I')
 				mpod.write_log()
-		
+
+				######################################################
+				"""
+				RV 07.18.2023
+				"""
+				mpod.INFLUX_write(powering,light_names,data,mpod,client)
+				######################################################
+
+			######################################################
+			"""
+			RV 07.18.2023
+			"""
+			# Monitor
+			if measureorset == "Monitor":
+				mpod.CONTINUOUS_monitoring(powering, light_names, mpod, mpodn, light_channels, client)
+			######################################################
+
 		# Controls light
 		elif powering == "Charge":
 			# Turns on/off
@@ -189,7 +280,7 @@ if __name__ == "__main__":
 					mpod.PACFAN_B_off(mpodn)
 					mpod.write_log()
 					print("PACFANs are powered off")
-				turn_off = input("Would you like to power off the MPOD crate? ")
+				turn_off = input("Would you like to power OFF the MPOD crate? \n Answer: ")
 				if turn_off == "y" or "Y" or "yes" or "Yes" or "YES":
 					mpod.mpodSwitch(mpodn,0)
 					print("MPOD is now off")
@@ -205,6 +296,22 @@ if __name__ == "__main__":
 				print(data[2][0], 'I \t', data[2][1], 'I \t', data[2][2], 'I \t', data[2][3], 'I')
 				mpod.write_log()
 
+				######################################################
+				"""
+				RV 07.18.2023
+				"""
+				mpod.INFLUX_write(powering,charge_names,data,mpod,client)
+				######################################################
+
+			######################################################
+			"""
+			RV 07.18.2023
+			"""
+			# Monitor
+			if measureorset == "Monitor":
+				mpod.CONTINUOUS_monitoring(powering, charge_names, mpod, mpodn, charge_channels, client)
+			######################################################
+
 		# Controls RTDs
 		elif powering == "Rtd":
 			# Turns on/off
@@ -212,19 +319,19 @@ if __name__ == "__main__":
 				if ONOFF == "ON":
 					mpod.SC_RTD_1_power(mpodn)
 					mpod.SC_RTD_2_power(mpodn)
-					print("RTDs are powered on")
+					print("RTDs are powered ON")
 					mpod.write_log()
 				elif ONOFF == "OFF":
 					mpod.SC_RTD_1_off(mpodn)
 					mpod.SC_RTD_2_off(mpodn)
-					print("RTDs are powered off")
+					print("RTDs are powered OFF")
 					mpod.write_log()
-				turn_off = input("Would you like to power off the MPOD crate? ")
+				turn_off = input("Would you like to power OFF the MPOD crate? \n Answer: ")
 				if turn_off == "y" or "Y" or "yes" or "Yes" or "YES":
 					mpod.mpodSwitch(mpodn,0)
-					print("MPOD is now off")
+					print("MPOD is now OFF")
 				else:
-					print("MPOD is stil on")
+					print("MPOD is stil ON")
 	
 			# Measures and displays the channel, the status, the voltage, and the current
 			if measureorset == "View":
@@ -234,6 +341,24 @@ if __name__ == "__main__":
 				print(data[1][0], 'V \t', data[1][1], 'V \t')
 				print(data[2][0], 'I \t', data[2][1], 'I \t')
 				mpod.write_log()
+
+				######################################################
+				"""
+				RV 07.18.2023
+				"""
+				mpod.INFLUX_write(powering,RTD_names,data,mpod,client)
+				######################################################
+
+			######################################################
+			"""
+			RV 07.18.2023
+			"""
+			# Monitor
+			if measureorset == "Monitor":
+				mpod.CONTINUOUS_monitoring(powering, RTD_names, mpod, mpodn, RTD_channels, client)
+			######################################################
+
+				
 		# Controls All channels
 		elif powering == "All":
 			# Turns on/off
@@ -258,6 +383,23 @@ if __name__ == "__main__":
 				print(data[1][0], 'V \t', data[1][1], 'V \t', data[1][2], 'V \t', data[1][3], 'V \t',data[1][4], 'V \t', data[1][5], 'V \t', data[1][6], 'V \t', data[1][7], 'V')
 				print(data[2][0], 'I \t', data[2][1], 'I \t', data[2][2], 'I \t', data[2][3], 'I \t',data[2][4], 'I \t', data[2][5], 'I \t', data[2][6], 'I \t', data[2][7], 'I')
 				mpod.write_log()
+
+				######################################################
+				"""
+				RV 07.18.2023
+				"""
+				mpod.INFLUX_write(powering,charge_n_light_names,data,mpod,client)
+				######################################################
+
+			######################################################
+			"""
+			RV 07.18.2023
+			"""
+			# Monitor
+			if measureorset == "Monitor":
+				mpod.CONTINUOUS_monitoring(powering, charge_n_light_names, mpod, mpodn, charge_n_light_channels, client)
+			######################################################
+				
 	else:
 		print('\n')
 		print("Your first prompt will be to enter the number of the MPOD")
