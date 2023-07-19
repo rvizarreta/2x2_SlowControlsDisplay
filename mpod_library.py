@@ -3,6 +3,8 @@ import os
 import time 
 from datetime import datetime
 
+import numpy as np
+
 class mpodPsu():
     
     def __init__(self,ip = ['192.168.196.6','192.168.196.7'], miblib='./mibs/'):
@@ -39,6 +41,7 @@ class mpodPsu():
             mpod = mpodPsu(self.ip[mpodn])
             log_data = mpod.measure(mpodn,channels)
             for i in range(len(log_data[0])):
+                print(str(channels[i]) +"\t"+ str(log_data[0][i]) + "\t" + str(log_data[1][i]) + " V \t" + str(log_data[2][i]) + " A\n")
                 f.write(str(channels[i]) +"\t"+ str(log_data[0][i]) + "\t" + str(log_data[1][i]) + " V \t" + str(log_data[2][i]) + " A\n")
         f.close()
 # Power switches
@@ -507,3 +510,85 @@ class mpodPsu():
         mpod.VGA_34_pos_power(mpodn)
         mpod.VGA_34_neg_power(mpodn) 	
 
+    """
+    RV 07.18.2023
+    """
+
+    def JSON_setup(self, measurement, module, status, voltage, current):
+        '''
+        Inputs:         - Measurement (i.e. light)
+                        - Module (i.e. VGA_12_POS)
+                        - Status (i.e. OFF)
+                        - Fields (Voltage & current)
+
+        Outputs:        - JSON file ready to be added to InfluxDB
+
+        Description:    Provides new timestamp ready to be added to InfluxDB
+        '''
+        json_payload = []
+        data = {
+            # Table name
+            "measurement" : measurement, 
+            # Organization tags
+            "tags" : { 
+                "module" : module,
+                "status" : status
+            },
+            # Time stamp
+            "time" : datetime.now().strftime('%Y%m%d %H:%M:%S'), 
+            # Data fields
+            "fields" : { 
+                "voltage" : voltage,
+                "current" : current
+            }
+        }
+        json_payload.append(data)
+        return json_payload
+
+    def INFLUX_write(self, powering, modules, data, mpod, client):
+        '''
+        Inputs:         - Powering (i.e. light)
+                        - Module (i.e. VGA_12_POS)
+                        - Data (MPOD measurement array)
+                        - MPOD (MPOD instance)
+                        - Client (InfluxDB client)
+
+        Description:    Record timestamp on InfluxDB
+        '''
+        data = np.array(data)
+        for module_number in range(0,data.shape[1]):
+            data_column = data[:,module_number]
+            client.write_points(mpod.JSON_setup(
+                measurement = powering,
+                module = modules[module_number],
+                status = data_column[0],
+                voltage = data_column[1],
+                current = data_column[2]
+            ))
+    
+    def CONTINUOUS_monitoring(self, powering, modules, mpod, mpodn, channels, client):
+        '''
+        Inputs:         - Powering (i.e. light)
+                        - Module (i.e. VGA_12_POS)
+                        - MPOD (MPOD instance)
+                        - MPODn (MPOD number selected)
+                        - Channels (List of channels)
+                        - Client (InfluxDB client)
+
+        Description:    Continuously record timestamp on InfluxDB
+        '''
+        try:
+            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+            print("Continuous DAQ Activated")
+            print("Taking data in real time")
+            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+            while True:
+                data = mpod.measure(mpodn,channels)
+                mpod.INFLUX_write(powering,modules,data,mpod,client)
+                time.sleep(2)
+        except KeyboardInterrupt:
+            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+            print("Continuous DAQ Terminated")
+            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
+            raise SystemExit
+    
