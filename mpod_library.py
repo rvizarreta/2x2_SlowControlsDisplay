@@ -535,11 +535,11 @@ class mpodPsu():
                 "status" : status
             },
             # Time stamp
-            "time" : datetime.now().strftime('%Y%m%d %H:%M:%S'), 
-            # Data fields
+            "time" : datetime.utcnow().strftime('%Y%m%d %H:%M:%S'),
+            # Data fields 
             "fields" : { 
-                "voltage" : voltage,
-                "current" : current
+                "voltage" : float(voltage)+5*np.random.rand(1)[0],
+                "current" : float(current)+5*np.random.rand(1)[0]
             }
         }
         json_payload.append(data)
