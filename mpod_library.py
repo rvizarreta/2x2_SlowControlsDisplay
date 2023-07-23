@@ -58,10 +58,21 @@ class mpodPsu():
     #	Retruns the status of the output channel
     def getStatus(self, mpodn, channel):
 
-        data = os.popen("snmpget -v 2c -M " + self.miblib + " -m +WIENER-CRATE-MIB -c public " + self.ip[mpodn] + " outputStatus" + channel)
-        ret = data.read().split('\n')
-
+        data = os.popen("snmpget -v 2c -M " + self.miblib + " -m +WIENER-CRATE-MIB -c public " + self.ip[mpodn] + " outputStatus" + channel)        
+        #ret = data.read().split('\n')
+        """
+        RV 07.22.2023
+        """
+        ret = data.read().split('= ')[1].split('\n')[0]
         return ret
+    """
+    RV 07.22.2023
+    """
+    def getChannelStatus(self, mpodn, channel):
+        output = os.popen("snmpget -v 2c -M " + self.miblib + " -m +WIENER-CRATE-MIB -c public " + self.ip[mpodn] + " outputStatus" + channel)        
+        response = output.read().split('= ')[1].split('\n')[0]
+        off_message = 'No Such Instance currently exists at this OID'
+        return False if response == off_message else True
 
     #	Returns the voltage that the channel was set to
     def getVoltage(self, mpodn, channel):
@@ -592,3 +603,14 @@ class mpodPsu():
             print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
             raise SystemExit
     
+    """
+    RV 07.22.2023
+    """
+    def getChannelStatus(self, mpodn, channel):
+        '''
+        Description TBD
+        '''
+        output = os.popen("snmpget -v 2c -M " + self.miblib + " -m +WIENER-CRATE-MIB -c public " + self.ip[mpodn] + " outputStatus" + channel)        
+        response = output.read().split('= ')[1].split('\n')[0]
+        off_message = 'No Such Instance currently exists at this OID'
+        return False if response == off_message else True
