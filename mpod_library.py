@@ -549,8 +549,8 @@ class mpodPsu():
             "time" : datetime.utcnow().strftime('%Y%m%d %H:%M:%S'),
             # Data fields 
             "fields" : { 
-                "voltage" : float(voltage),#+5*np.random.rand(1)[0],
-                "current" : float(current)#+5*np.random.rand(1)[0]
+                "voltage" : float(voltage)+5*np.random.rand(1)[0],
+                "current" : float(current)+5*np.random.rand(1)[0]
             }
         }
         json_payload.append(data)
@@ -592,7 +592,6 @@ class mpodPsu():
             print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
             print("Continuous DAQ Activated")
             print("Taking data in real time")
-            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
             while True:
                 data = mpod.measure(mpodn,channels)
                 mpod.INFLUX_write(powering,modules,data,mpod,client)
