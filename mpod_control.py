@@ -7,6 +7,7 @@ import sys
 # InfluxDB required packages
 from influxdb import InfluxDBClient
 from datetime import datetime
+import threading
 
 """
 sudo apt-get install snmp-mibs-downloader
@@ -397,7 +398,16 @@ if __name__ == "__main__":
 			"""
 			# Monitor
 			if measureorset == "Monitor":
-				mpod.CONTINUOUS_monitoring(powering, charge_n_light_names, mpod, mpodn, charge_n_light_channels, client)
+				#mpod.CONTINUOUS_monitoring(powering, charge_n_light_names, mpod, mpodn, charge_n_light_channels, client)
+				thread1 = threading.Thread(target=mpod.CONTINUOUS_monitoring, args=("Light", light_names, mpod, mpodn, light_channels, client))
+				thread1.start()
+				thread2 = threading.Thread(target=mpod.CONTINUOUS_monitoring, args=("Charge", charge_names, mpod, mpodn, charge_channels, client))
+				thread2.start()
+				thread3 = threading.Thread(target=mpod.CONTINUOUS_monitoring, args=("Rtd", RTD_names, mpod, mpodn, RTD_channels, client))
+				thread3.start()
+				#f1 = mpod.CONTINUOUS_monitoring("Light", light_names, mpod, mpodn, light_channels, client)
+				#f2 = mpod.CONTINUOUS_monitoring("Charge", charge_names, mpod, mpodn, charge_channels, client)
+				#f3 = mpod.CONTINUOUS_monitoring("Rtd", RTD_names, mpod, mpodn, RTD_channels, client)
 			######################################################
 				
 	else:
