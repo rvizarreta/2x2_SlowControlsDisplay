@@ -549,8 +549,8 @@ class mpodPsu():
             "time" : datetime.utcnow().strftime('%Y%m%d %H:%M:%S'),
             # Data fields 
             "fields" : { 
-                "voltage" : float(voltage)+5*np.random.rand(1)[0],
-                "current" : float(current)+5*np.random.rand(1)[0]
+                "voltage" : float(voltage),#+5*np.random.rand(1)[0],
+                "current" : float(current)#+5*np.random.rand(1)[0]
             }
         }
         json_payload.append(data)
@@ -602,15 +602,3 @@ class mpodPsu():
             print("Continuous DAQ Terminated")
             print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
             raise SystemExit
-    
-    """
-    RV 07.22.2023
-    """
-    def getChannelStatus(self, mpodn, channel):
-        '''
-        Description TBD
-        '''
-        output = os.popen("snmpget -v 2c -M " + self.miblib + " -m +WIENER-CRATE-MIB -c public " + self.ip[mpodn] + " outputStatus" + channel)        
-        response = output.read().split('= ')[1].split('\n')[0]
-        off_message = 'No Such Instance currently exists at this OID'
-        return False if response == off_message else True
