@@ -1,0 +1,15 @@
+{
+    "gizmo" : {
+        "host-name" : "lartf-gizmo01",
+        "username" : "root",
+        "password" : "",
+        "port" : 22,
+        "powering" :{
+            "resistance" : {"measurements" : "resistance"},
+            "threshold" : {"measurements" : "threshold"},
+            "magnitude" : {"measurements" : "magnitude"},
+            "current" : {"measurements" : "current"},
+            "charge" : {"measurements" : "charge"}
+        }
+    }
+}
