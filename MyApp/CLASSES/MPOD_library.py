@@ -1,4 +1,4 @@
-from UNIT_library import UNIT
+from CLASSES.UNIT_library import UNIT
 from pysnmp.hlapi import *
 import os
 import time 
@@ -20,6 +20,8 @@ class MPOD(UNIT):
         self.miblib = miblib
         super().__init__(module, unit)
         self.dictionary = dict_unit
+        self.crate_status = None
+        self.measuring_status = {key: None for key in self.dictionary['powering'].keys()}
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # GET METHODS
@@ -53,6 +55,12 @@ class MPOD(UNIT):
         data = os.popen("snmpget -v 2c -M " + self.miblib + " -m +WIENER-CRATE-MIB -c public " + self.dictionary['ip'] + " outputMeasurementCurrent" + channel)
         ret = data.read().split('\n')
         return ret[0].split(" ")[-2]
+    
+    def getCrateStatus(self):
+        return self.crate_status
+    
+    def getMeasuringStatus(self):
+        return self.measuring_status
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # SET METHODS
@@ -86,6 +94,11 @@ class MPOD(UNIT):
         Powering ON/OFF power supply
         '''
         os.popen("snmpset -v 2c -M " + self.miblib + " -m +WIENER-CRATE-MIB -c guru " + self.dictionary['ip'] + " sysMainSwitch" + ".0 i " + str(switch))
+        if switch == 0:
+            self.crate_status = False # ON
+            self.measuring_status = {key: False for key in self.dictionary['powering'].keys()}
+        else:
+            self.crate_status = True # ON
 
     def channelSwitch(self, switch, channel):
         '''
@@ -109,7 +122,8 @@ class MPOD(UNIT):
             self.channelSwitch(1, channel)
             self.setVoltage(selected_channel['V'], channel)
             #print(str(channel), str(self.getMeasurementSenseVoltage(channel)), selected_channel['V'])
-
+        self.measuring_status[powering] = True
+        
     def powerOFF(self, powering):
         '''
         Power-OFF all channels
@@ -122,6 +136,7 @@ class MPOD(UNIT):
             self.setVoltage(selected_channel['V'], channel)
             #print(str(channel), str(self.getMeasurementSenseVoltage(channel)), selected_channel['V'])
             self.channelSwitch(0, channel)
+        self.measuring_status[powering] = False
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # MEASURING METHODS
@@ -180,6 +195,34 @@ class MPOD(UNIT):
                              [float(element) for element in data_column[1:]])
             ))
         client.close()
+
+    def JSON_setup(self, measurement, channel_name, status, fields):
+            '''
+            Inputs:         - Measurement (i.e. light)
+                            - Channel name (i.e. VGA_12_POS)
+                            - Status (i.e. OFF)
+                            - Fields (i.e. Voltage & current)
+
+            Outputs:        - JSON file ready to be added to InfluxDB
+
+            Description:    Provides new timestamp ready to be added to InfluxDB
+            '''
+            json_payload = []
+            data = {
+                # Table name
+                "measurement" : measurement, 
+                # Organization tags
+                "tags" : { 
+                    "channel_name" : channel_name,
+                    "status" : status
+                },
+                # Time stamp
+                "time" : datetime.utcnow().strftime('%Y%m%d %H:%M:%S'),
+                # Data fields 
+                "fields" : dict(fields)
+            }
+            json_payload.append(data)
+            return json_payload
     
     def CONTINUOUS_monitoring(self, powering):
         '''

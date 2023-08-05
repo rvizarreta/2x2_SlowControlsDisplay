@@ -26,7 +26,7 @@ class GIZMO(UNIT):
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # CONFIGURATION METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-    def startMeasuring(self):
+    def makeConnection(self):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(self.dictionary["host-name"], self.dictionary["port"], self.dictionary["username"], self.dictionary["password"], timeout=200)
@@ -57,21 +57,37 @@ class GIZMO(UNIT):
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # INFLUXDB METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-    def INFLUX_write(self, powering, data):
+    def INFLUX_write(self, measurement, value):
         '''
-        Inputs:         - Powering (i.e. resistance)
-                        - Data (measurement value)
+        Inputs:         - Measurement (i.e. resistance)
+                        - Value (i.e. resistance value)
 
         Description:    Record timestamp on InfluxDB
         '''
         client = self.InitializeInfluxDB()
-        client.write_points(self.JSON_setup(
-            measurement = powering,
-            fields = {
-                powering : data
-            }
-        ))
+        client.write_points(self.JSON_setup(measurement, value))
         client.close()
+
+    def JSON_setup(self, measurement, value):
+        '''
+        Inputs:         - Measurement (i.e. resistance)
+                        - Value (i.e. resistance value)
+
+        Outputs:        - JSON file ready to be added to InfluxDB
+
+        Description:    Provides new timestamp ready to be added to InfluxDB
+        '''
+        json_payload = []
+        data = {
+            # Table name
+            "measurement" : measurement, 
+            # Time stamp
+            "time" : datetime.utcnow().strftime('%Y%m%d %H:%M:%S'),
+            # Data fields 
+            "fields" : {measurement : value}
+        }
+        json_payload.append(data)
+        return json_payload
 
     def CONTINUOUS_monitoring(self):
         '''
@@ -82,7 +98,6 @@ class GIZMO(UNIT):
             print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
             print("Continuous DAQ Activated")
             print("Taking data in real time")
-            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
             while True:
                 line = self.measure()
                 if 'RES' == line[0:3]:
@@ -91,11 +106,10 @@ class GIZMO(UNIT):
                     line = line.replace('= ', '=')
                     line = line.replace(', ', ' ')
                     sl = line.split() # split line
-                    print(sl)
                     data = [float(sl[i].split('=')[1]) for i in range(0,5)]
-                    print(data)
                 
                     for powering, value in zip(powering_list, data):
+                        print(powering,value)
                         self.INFLUX_write(powering, value)
                 
                     time.sleep(2)
@@ -104,3 +118,5 @@ class GIZMO(UNIT):
             print('*** Caught exception: %s: %s' % (e.__class__, e))
             traceback.print_exc()
             sys.exit(1)
+
+            
