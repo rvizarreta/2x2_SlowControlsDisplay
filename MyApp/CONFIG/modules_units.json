@@ -2,28 +2,11 @@
     "module0" : {
         "mpod0" : {
             "ip" : "192.168.196.6",
+            "class" : "MPOD",
             "powering" :{
                 "charge" : {
                     "measurements" : ["voltage", "current"],
                     "channels" : {
-                        ".u0" : {
-                            "name" : "PACMAN_A",
-                            "max_current" : 3.75,
-                            "current" : 3.5,
-                            "max_sense_voltage" : 24.5,
-                            "max_voltage" : 25,
-                            "rate" : 1000,
-                            "V" : 24.01
-                        },
-                        ".u1" : {
-                            "name" : "PACMAN_B",
-                            "max_current" : 3.75,
-                            "current" : 3.5,
-                            "max_sense_voltage" : 24.5,
-                            "max_voltage" : 25,
-                            "rate" : 1000,
-                            "V" : 24.01
-                        },
                         ".u100" : {
                             "name" : "PACMAN_C",
                             "max_current" : 0.65,
