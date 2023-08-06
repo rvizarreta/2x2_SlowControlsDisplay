@@ -1,5 +1,6 @@
 {
     "gizmo" : {
+        "class" : "GIZMO",
         "host-name" : "lartf-gizmo01",
         "username" : "root",
         "password" : "",
@@ -10,6 +11,26 @@
             "magnitude" : {"measurements" : "magnitude"},
             "current" : {"measurements" : "current"},
             "charge" : {"measurements" : "charge"}
+        }
+    },
+    "mpod_crate" : {
+        "class" : "MPOD",
+        "ip" : "192.168.196.6",
+        "powering" :{
+            "charge" : {
+                "measurements" : ["voltage", "current"],
+                "channels" : {
+                    ".u100" : {
+                        "name" : "PACMAN_C",
+                        "max_current" : 0.65,
+                        "current" : 0.6,
+                        "max_sense_voltage" : 13.2,
+                        "max_voltage" : 13.2,
+                        "rate" : 1000,
+                        "V" : 7.5
+                    }
+                }
+            }
         }
     }
 }

@@ -14,6 +14,15 @@ class UNIT():
         #Unit device constructor
         self.module = module
         self.unit = unit
+
+    #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+    # GET METHODS
+    #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+    def getUnit(self):
+        return self.unit
+    
+    def getModule(self):
+        return self.module
         
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # INFLUXDB METHODS

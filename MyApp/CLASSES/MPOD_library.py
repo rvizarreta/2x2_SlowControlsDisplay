@@ -20,12 +20,13 @@ class MPOD(UNIT):
         self.miblib = miblib
         super().__init__(module, unit)
         self.dictionary = dict_unit
-        self.crate_status = None
-        self.measuring_status = {key: None for key in self.dictionary['powering'].keys()}
+        self.crate_status = self.getCrateStatus()
+        self.measuring_status = self.getMeasuringStatus()
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # GET METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+
     def getIP(self):
         return self.dictionary['ip']
     
@@ -57,9 +58,18 @@ class MPOD(UNIT):
         return ret[0].split(" ")[-2]
     
     def getCrateStatus(self):
-        return self.crate_status
+        return False if  "No Such Instance" in self.measure('charge')[0][0][0] else True
     
     def getMeasuringStatus(self):
+        if self.unit != "mpod_crate":
+            self.measuring_status = {}
+            for key in self.dictionary['powering'].keys():
+                if self.measure(key)[0][0]=="ON":
+                    self.measuring_status[key] = True 
+                else:
+                    self.measuring_status[key] = False
+        else:
+            self.measuring_status = None
         return self.measuring_status
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
