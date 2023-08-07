@@ -26,6 +26,11 @@ class MPOD(UNIT):
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # GET METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+    def getOnMessage(self):
+        return self.dictionary["on_message"]
+    
+    def getOffMessage(self):
+        return self.dictionary["off_message"]
 
     def getIP(self):
         return self.dictionary['ip']
@@ -99,7 +104,7 @@ class MPOD(UNIT):
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # CONFIGURATION METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-    def PSU_switch(self, switch):
+    def powerSwitch(self, switch):
         '''
         Powering ON/OFF power supply
         '''
@@ -109,6 +114,7 @@ class MPOD(UNIT):
             self.measuring_status = {key: False for key in self.dictionary['powering'].keys()}
         else:
             self.crate_status = True # ON
+        time.sleep(2)
 
     def channelSwitch(self, switch, channel):
         '''

@@ -11,7 +11,9 @@
             "magnitude" : {"measurements" : "magnitude"},
             "current" : {"measurements" : "current"},
             "charge" : {"measurements" : "charge"}
-        }
+        },
+        "on_message" : "Gizmo is on and measuring resistance, threshold, magnitude, current, and charge. Turn off manually only.",
+        "off_message" : " "
     },
     "mpod_crate" : {
         "class" : "MPOD",
@@ -31,6 +33,8 @@
                     }
                 }
             }
-        }
+        },
+        "on_message" : "MPOD crate is on. Turning it off will affect all modules.",
+        "off_message" : "MPOD crate is off. Nothing is supplied to the modules."
     }
 }

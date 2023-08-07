@@ -42,9 +42,6 @@ for unit in othersDB.keys():
     object = classes_dictionary[kind]
     others_dict[id] = object(None, unit, othersDB[unit])
     id += 1
-    
-
-
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FAST API CONFIGURATION
@@ -113,11 +110,7 @@ def get_other_status_by_id(unit_id: int):
     '''
     Return other unit status (i.e. {light, current, rtd})
     '''
-    unit = others_dict[unit_id]
-    if unit.getUnit() == "gizmo":
-        return True # Assume gizmo is always ON
-    else:
-        return others_dict[unit_id].getCrateStatus()
+    return others_dict[unit_id].getCrateStatus()
     
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # PUT METHODS
@@ -128,7 +121,7 @@ def turnON_attached_by_id(unit_id: int, measuring: str):
     Turn on measuring from unit connected to module (i.e. light readout from MPOD)
     '''
     attached_units_dict[unit_id].powerON(measuring)
-    return {"message" : "Measuring activated"} 
+    return {"message" : attached_units_dict[unit_id].getOnMessage()} 
 
 @app.put("/attached_units/{unit_id}/{measuring}/turn-off")
 def turnOFF_attached_by_id(unit_id: int, measuring: str):
@@ -136,28 +129,20 @@ def turnOFF_attached_by_id(unit_id: int, measuring: str):
     Turn off measuring from unit connected to module (i.e. light readout from MPOD)
     '''
     attached_units_dict[unit_id].powerOFF(measuring)
-    return {"message" : "Measuring deactivated"} 
+    return {"message" : attached_units_dict[unit_id].getOffMessage()} 
 
 @app.put("/other_units/{unit_id}/turn-on")
 def turnON_other_by_id(unit_id: int):
     '''
     Turn on unit NOT connected to module (i.e. MPOD Crate)
     '''
-    if others_dict[unit_id].getUnit() == "gizmo":
-        return {"message" : "Gizmo always on"}
-    else:
-        others_dict[unit_id].PSU_switch(1)
-        time.sleep(2)
-        return {"message" : "MPOD Crate ON"} 
+    others_dict[unit_id].powerSwitch(1)
+    return {"message" : others_dict[unit_id].getOnMessage()} 
     
 @app.put("/other_units/{unit_id}/turn-off")
-def turnON_other_by_id(unit_id: int):
+def turnOFF_other_by_id(unit_id: int):
     '''
     Turn off unit NOT connected to module (i.e. MPOD Crate)
     '''
-    if others_dict[unit_id].getUnit() == "gizmo":
-        return {"message" : "Gizmo always on"}
-    else:
-        others_dict[unit_id].PSU_switch(0)
-        time.sleep(2)
-        return {"message" : "MPOD Crate OFF"} 
+    others_dict[unit_id].powerSwitch(0)
+    return {"message" : others_dict[unit_id].getOffMessage()} 

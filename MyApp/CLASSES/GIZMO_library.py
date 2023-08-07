@@ -22,6 +22,19 @@ class GIZMO(UNIT):
         self.dictionary = dict_unit
         self.client = None
         self.chan = None
+        self.crate_status = self.getCrateStatus()
+
+    #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+    # GET METHODS
+    #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+    def getOnMessage(self):
+        return self.dictionary["on_message"]
+    
+    def getOffMessage(self):
+        return self.dictionary["off_message"]
+    
+    def getCrateStatus(self):
+        return True
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # CONFIGURATION METHODS
@@ -38,6 +51,9 @@ class GIZMO(UNIT):
     def stopMeasuring(self):
         self.chan.close()
         self.client.close()
+
+    def powerSwitch(self, switch):
+        return None
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # MEASURING METHODS
