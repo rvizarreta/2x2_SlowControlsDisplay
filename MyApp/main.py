@@ -1,7 +1,7 @@
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FAST API PACKAGES
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
@@ -10,7 +10,8 @@ from pydantic import BaseModel
 from CLASSES.MPOD_library import MPOD
 from CLASSES.MPOD_library import UNIT
 from CLASSES.dictionary import classes_dictionary
-import json, time
+import json
+import threading
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # GENERATING OBJECT MODELS
@@ -32,7 +33,7 @@ for module in moduleDB.keys():
         kind = moduleDB[module][unit]["class"]
         object = classes_dictionary[kind]
         attached_units_dict[id] = object(module, unit, moduleDB[module][unit])
-        id += 1
+        id += 1 
 
 id = 0
 others_dict = {}
@@ -47,8 +48,67 @@ for unit in othersDB.keys():
 # FAST API CONFIGURATION
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FastAPI handles JSON serialization and deserialization for us.
-app = FastAPI()
+description = """
+SlowControlsApp allows you to manage the units connected (and not) to each module.
 
+## CRUD (Create, Read, Update, Delete)
+Because all we want to do is manage (turn stuff ON/OFF), we will only use Read and Update methods. Remember that each module configuration (units connected, channels, powering, etc.) is stored in a single JSON file located on /CONFIG/modules_units.json. We also have units (such as gizmo) that are not connected to each of the modules but that we also track and manage, we call them 'others'. The configuration for these units can be found on /CONFIG/other_units.json.
+"""
+tags_metadata = [
+{
+"name" : "Read",
+"description" :
+"""
+* **Read modules' JSON configuration file** (_get raw JSON file_)
+* **Read others' JSON configuration file** (_get raw JSON file_)
+* **Read units connected to modules** (_get dictionary with attached units objects with unique id_)
+* **Read unit connected to module by ID** (_get configuration dictionary of specific unit_)
+* **Read other units** (_get dictionary with other units objects with unique id_)
+* **Read other unit by ID** (_get configuration dictionary of specific unit_)
+* **Read status of unit connected to module by ID** (_get boolean response if unit is ON/OFF_)
+* **Read status of other unit by ID** (_get boolean response if unit is ON/OFF_)
+"""
+},
+{
+"name" : "Update",
+"description" :
+"""
+* **Turn ON unit connected to module by unit ID** (_get success response_)
+* **Turn OFF unit connected to module by unit ID** (_get success response_)
+* **Turn ON other unit by unit ID** (_get success response_)
+* **Turn OFF other unit by unit ID** (_get success response_)
+"""
+}
+]
+app = FastAPI(
+    title = "SlowControlsApp",
+    description = description,
+    summary = "API manager for Mx2 slow control components such as gizmo, TTI, mpod, etc.",
+    version = "0.0.1",
+    openapi_tags=tags_metadata,
+    contact={
+        "name" : "Renzo Vizarreta",
+        "email" : "rvizarr@fnal.gov",
+    }
+)
+# Adding cors headers
+from fastapi.middleware.cors import CORSMiddleware
+# Adding cors urls
+origins = [
+    'http://localhost:3000' # This is where the react application lives
+]
+# Add middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = origins,
+    allow_credentials = True,
+    allow_methods = ["*"],
+    allow_headers = ["*"]
+)
+
+#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+# CRUD API FUNCTIONALITY
+# Create, Read, Update, Delete
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # GET METHODS
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
@@ -56,56 +116,56 @@ app = FastAPI()
 def index():
     return {"message" : "Hello World!"}
 
-@app.get("/allmodules")
+@app.get("/allmodules", tags=["Read"])
 def get_ModulesJSON():
     '''
     Return modules JSON file
     '''
     return moduleDB
 
-@app.get("/allothers")
+@app.get("/allothers", tags=["Read"])
 def get_other_modulesJSON():
     '''
     Return other units (i.e. Gizmo) JSON file
     '''
     return othersDB
 
-@app.get("/attached_units")
+@app.get("/attached_units", tags=["Read"])
 def get_attached_units():
     '''
     Return all objects of units connected to modules
     '''
     return attached_units_dict
 
-@app.get("/attached_units/{unit_id}")
+@app.get("/attached_units/{unit_id}", tags=["Read"])
 def get_attached_unit_by_id(unit_id: int):
     '''
     Return object by id
     '''
     return attached_units_dict[unit_id]
 
-@app.get("/other_units")
+@app.get("/other_units", tags=["Read"])
 def get_other_units():
     '''
     Return all objects of units NOT connected to modules
     '''
     return others_dict
 
-@app.get("/other_units/{unit_id}")
+@app.get("/other_units/{unit_id}", tags=["Read"])
 def get_others_by_id(unit_id: int):
     '''
     Return object by id
     '''
     return others_dict[unit_id]
 
-@app.get("/attached_units/{unit_id}/status")
+@app.get("/attached_units/{unit_id}/status", tags=["Read"])
 def get_attached_status_by_id(unit_id: int):
     '''
     Return unit status of measuring elements (i.e. {light, current, rtd})
     '''
     return attached_units_dict[unit_id].getMeasuringStatus()
 
-@app.get("/other_units/{unit_id}/status")
+@app.get("/other_units/{unit_id}/status", tags=["Read"])
 def get_other_status_by_id(unit_id: int):
     '''
     Return other unit status (i.e. {light, current, rtd})
@@ -115,15 +175,19 @@ def get_other_status_by_id(unit_id: int):
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # PUT METHODS
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-@app.put("/attached_units/{unit_id}/{measuring}/turn-on")
-def turnON_attached_by_id(unit_id: int, measuring: str):
+@app.put("/attached_units/{unit_id}/{measuring}/turn-on", tags=["Update"])
+async def turnON_attached_by_id(unit_id: int, measuring: str):
     '''
     Turn on measuring from unit connected to module (i.e. light readout from MPOD)
     '''
-    attached_units_dict[unit_id].powerON(measuring)
-    return {"message" : attached_units_dict[unit_id].getOnMessage()} 
+    attached_units_dict[unit_id].powerON(measuring) 
+    # Continuous monitoring
+    threading.Thread(target=attached_units_dict[unit_id].CONTINUOUS_monitoring, args=([measuring]), kwargs={}).start()
+    return {"message" : attached_units_dict[unit_id].getOnMessage() + " Measuring: " + measuring} 
 
-@app.put("/attached_units/{unit_id}/{measuring}/turn-off")
+#loop.create_task(turnON_attached_by_id)
+
+@app.put("/attached_units/{unit_id}/{measuring}/turn-off", tags=["Update"])
 def turnOFF_attached_by_id(unit_id: int, measuring: str):
     '''
     Turn off measuring from unit connected to module (i.e. light readout from MPOD)
@@ -131,18 +195,22 @@ def turnOFF_attached_by_id(unit_id: int, measuring: str):
     attached_units_dict[unit_id].powerOFF(measuring)
     return {"message" : attached_units_dict[unit_id].getOffMessage()} 
 
-@app.put("/other_units/{unit_id}/turn-on")
+@app.put("/other_units/{unit_id}/turn-on", tags=["Update"])
 def turnON_other_by_id(unit_id: int):
     '''
     Turn on unit NOT connected to module (i.e. MPOD Crate)
     '''
     others_dict[unit_id].powerSwitch(1)
+    # Continuous monitoring
+    threading.Thread(target=others_dict[unit_id].CONTINUOUS_monitoring, args=(), kwargs={}).start()
+    # This will raise an error for the mpod crate!
     return {"message" : others_dict[unit_id].getOnMessage()} 
     
-@app.put("/other_units/{unit_id}/turn-off")
+@app.put("/other_units/{unit_id}/turn-off", tags=["Update"])
 def turnOFF_other_by_id(unit_id: int):
     '''
     Turn off unit NOT connected to module (i.e. MPOD Crate)
     '''
     others_dict[unit_id].powerSwitch(0)
     return {"message" : others_dict[unit_id].getOffMessage()} 
+

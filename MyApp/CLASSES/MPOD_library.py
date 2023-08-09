@@ -247,13 +247,12 @@ class MPOD(UNIT):
         Description:    Continuously record timestamp on InfluxDB
         '''
         try:
-            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
             print("Continuous DAQ Activated")
             print("Taking data in real time")
-            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
-            while True:
+            while self.getCrateStatus():
                 data = self.measure(powering)
                 self.INFLUX_write(powering,data)
+                #self.write_log()
                 time.sleep(2)
 
         except Exception as e:
