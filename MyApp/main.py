@@ -73,8 +73,8 @@ tags_metadata = [
 "name" : "Update",
 "description" :
 """
-* **Turn ON unit connected to module by unit ID** (_get success response_)
-* **Turn OFF unit connected to module by unit ID** (_get success response_)
+* **Turn ON unit connected to module by unit ID** (_get success response and measure output continuously_)
+* **Turn OFF unit connected to module by unit ID** (_get success response and measure output continuously_)
 * **Turn ON other unit by unit ID** (_get success response_)
 * **Turn OFF other unit by unit ID** (_get success response_)
 """
@@ -95,7 +95,7 @@ app = FastAPI(
 from fastapi.middleware.cors import CORSMiddleware
 # Adding cors urls
 origins = [
-    'http://localhost:3000' # This is where the react application lives
+    'http://localhost:3006' # This is where the react application lives
 ]
 # Add middleware
 app.add_middleware(
