@@ -1,7 +1,9 @@
 :root{
   --background_blue : #00070D;
   --light_blue : #7CAED5;
-  --orange : #F3A054
+  --orange : #F3A054;
+  --green_background : rgba(87, 164, 80, 0.2);
+  --red_background : rgba(164, 80, 80, 0.2)
 }
 
 .mother_container {
@@ -45,6 +47,64 @@
   display: block;
   padding:0;
   margin:auto;
+}
+
+.card-on {
+  background-color: var(--green_background);
+  border-radius: 10px;
+  width: 272px;
+  height: 107px;
+  flex-shrink: 0; 
+}
+
+.card-off {
+  background-color: var(--red_background);
+  border-radius: 10px;
+  width: 272px;
+  height: 107px;
+  flex-shrink: 0; 
+}
+
+.card-title {
+  color: #FFF;
+  font-family : 'Open Sans', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 24px; 
+  letter-spacing: 0.15px;
+  padding-left: 24px;
+  padding-top: 16px;
+}
+
+.card-text-on {
+  font-family : 'Open Sans', sans-serif;
+  color: #57A450;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.32px;
+  padding-left: 24px;
+  padding-right: 24px;
+  margin-top: -5px;
+}
+
+.card-text-off {
+  font-family : 'Open Sans', sans-serif;
+  color: red;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: -0.32px;
+  padding-left: 24px;
+  padding-right: 24px;
+  margin-top: -5px;
+}
+
+.button-on {
+  background-color: white;
 }
 
 
