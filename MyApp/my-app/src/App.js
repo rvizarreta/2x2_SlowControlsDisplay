@@ -1,17 +1,17 @@
 import './App.css';
+//import react from 'react'
+import Header from './components/header';
+import Card from './components/card';
 
 function App() {
   return (
     <div className="mother_container">
-      <div className="title-container">
-        <div>
-        <p className="title">Mx2 Slow Controls Configuration Room</p>
-        <p className="subtitle">Turn ON/OFF each unit by pressing the toggle switches. To monitor the output data in real-time go to Grafana.</p>
-        </div>
-        <div className="title-image"></div>
-      </div>
+      <Header />
+      <Card />
+      <Card />
+      <Card />
     </div>
-  );
+  )
 }
 
 export default App;
