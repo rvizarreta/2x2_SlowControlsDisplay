@@ -31,7 +31,7 @@ function Card() {
       <div className={clicked ? 'card-off' : 'card-on'}>
         <div style={{display : 'flex'}}>
           <h2 className="card-title">MPOD Crate</h2>
-          <div style={{marginTop : '8px', paddingLeft : '56px'}}>
+          <div style={{marginTop : '8px', paddingLeft : '40px'}}>
             <ThemeProvider theme={theme}>
               <div>
                 <Button color={clicked ? 'secondary' : 'primary'}
