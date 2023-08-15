@@ -16,14 +16,14 @@ const theme = createTheme({
 })
 
 // COMPONENT FUNCTION
-function ModuleBox() {
+function ModuleBox({ id, title }) {
 
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
   //# RETURN CARD
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     return (
       <div className="module-container">
-        <h2 className="module-title">Module 0</h2>
+        <h2 className="module-title">{title}</h2>
         <div className='unit-name'>MPOD-0</div>
         <div>
           <Measuring />
