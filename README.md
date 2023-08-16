@@ -1,15 +1,76 @@
 # Mx2_SlowControlsDisplay
 
-This repository contains the code used for setting up the slow controls monitoring system for Mx2. The specification for the current version are:
+This repository contains the code used for setting up the slow controls monitoring system for Mx2. 
 
-- Python version: 2.7.5
-- InfluxDB version: 1.8.10
-- Working on local virtual environment venv that contains influxdb and pysnmp (do pip install for these).
+## Technology Stack:
 
-Current working flow to generate configuration report.
+- Backend: FastAPI. Go to `https://localhost:8000/docs` for more detail.
+- Frontend: React JS
+- Database: InfluxDB version 1.8.10
+- Monitoring: Grafana
+- Working on python virtual environment venv that contains influxdb and pysnmp (do pip install for these).
+
+## The Architecture:
+Previous working flow to generate configuration report.
 
 ![image](https://github.com/rvizarreta/Mx2_SlowControlsDisplay/assets/34606228/b353d354-c0cf-4b98-919e-41a0cacbf8e8)
 
-Proposed working flow considering Grafana display for continuous monitoring.
+New working flow considering Grafana display for continuous monitoring.
 
 ![image](https://github.com/rvizarreta/Mx2_SlowControlsDisplay/assets/34606228/b9eefee5-8374-489e-a313-44ffa20da7d0)
+
+Using approach from above, I propose the new architecture for the Slow Controls GUI:
+
+![image](https://github.com/rvizarreta/Mx2_SlowControlsDisplay/assets/34606228/5ad2391b-7a69-4a3b-a731-de15dd602a69)
+
+## How to Start this App?
+To run this, follow this steps:
+
+**Backend:**
+
+1) Go to my personal work area:
+```bash
+/home/acd/rvizarr/Mx2_SlowControlsDisplay
+```
+2) Source python environment:
+```bash
+source myenv/bin/activate
+```
+
+3) Go to backend directory:
+```bash
+/home/acd/rvizarr/Mx2_SlowControlsDisplay/MyApp
+```
+4) Start backend server:
+```bash
+uvicorn main:app --reload
+```
+
+**Frontend (use a new terminal session):**
+
+1) Go to my personal work area:
+```bash
+/home/acd/rvizarr/Mx2_SlowControlsDisplay
+```
+2) Source python environment:
+```bash
+source myenv/bin/activate
+```
+
+3) Go to frontend app directory:
+```bash
+/home/acd/rvizarr/Mx2_SlowControlsDisplay/MyApp/my-app
+```
+
+4) Start server:
+```bash
+npm start
+```
+
+5) Access GUI in your VNC browser:
+```bash
+localhost:3006
+```
+
+
+
