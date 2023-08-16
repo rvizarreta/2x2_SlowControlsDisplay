@@ -55,7 +55,8 @@ function App() {
           const formattedString = `Module ${numericValue}`;
           newModulesData.push([
             <ModuleBox id={i}
-                  title={formattedString}/>,
+                  title={formattedString}
+                  units={Object.keys(data[modules_names[i]])}/>,
             //<ModuleBox id={i+1}
             //      title={modules_names[i + 1].toUpperCase()}/>,
           ]);
