@@ -28,45 +28,42 @@
 .subtitle{
   color: var(--orange);
   font-family : 'Open Sans';
-  font-size: 0.8em;
+  font-size: 0.9em;
   margin-left: 60px;
+  padding-right: 20px;
 }
 
 .title-container {
   display: flex; /* Use flexbox to arrange title, subtitle, and image */
+  justify-content: space-between;
 }
 
 .title-image {
   width: 200px;
   height: 40px;
-  margin-top: 10px;
-  margin-left: 10px;
+  margin-top: 40px;
+  margin-right: 8%;
   background-image: url("media/dunelogo.png");
   background-size: contain;
   background-repeat: no-repeat;
-  display: block;
-  padding:0;
-  margin:auto;
 }
 
 .card-on {
   background-color: var(--green_background);
   border-radius: 10px;
-  width: 240px;
   height: 96px;
-  flex-shrink: 0; 
-  margin-left: 8px; /* Adjust spacing between rows */
-  margin-right: 8px; 
+  width: 220px;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 
 .card-off {
   background-color: var(--red_background);
   border-radius: 10px;
-  width: 240px;
   height: 96px;
-  flex-shrink: 0; 
-  margin-left: 8px; /* Adjust spacing between rows */
-  margin-right: 8px; 
+  width: 220px;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 
 .card-title {
@@ -79,6 +76,7 @@
   letter-spacing: 0.15px;
   padding-left: 24px;
   padding-top: 16px;
+  width: 20px;
 }
 
 .card-text-on {
@@ -92,6 +90,7 @@
   padding-left: 24px;
   padding-right: 24px;
   margin-top: -5px;
+  width: 100%;
 }
 
 .card-text-off {
@@ -105,6 +104,7 @@
   padding-left: 24px;
   padding-right: 24px;
   margin-top: -5px;
+  width: 100%;
 }
 
 .button-on {
@@ -119,8 +119,9 @@
 
 .other_units_group {
   display: inline-block; 
-  width: 40%;
+  width: 50%;
   margin-top: 40px;
+  padding-right: 10%;
 }
 
 .modules_group {
@@ -191,3 +192,7 @@
   font-family : 'Open Sans', sans-serif;
 }
 
+.custom-link {
+  color: var(--orange); /* Change this to the color you prefer */
+  text-decoration: underline; /* Remove underline, if desired */
+}
