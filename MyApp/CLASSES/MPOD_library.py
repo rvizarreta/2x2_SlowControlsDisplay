@@ -29,6 +29,9 @@ class MPOD(UNIT):
     def getOnMessage(self):
         return self.dictionary["on_message"]
     
+    def getClass(self):
+        return self.dictionary["class"]
+    
     def getOffMessage(self):
         return self.dictionary["off_message"]
 

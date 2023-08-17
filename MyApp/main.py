@@ -3,6 +3,7 @@
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # INTERNAL MANAGEMENT CLASSES
@@ -165,10 +166,17 @@ def get_attached_status_by_id(unit_id: int):
     '''
     return attached_units_dict[unit_id].getMeasuringStatus()
 
+@app.get("/attached_units/{unit_id}/crate_status", tags=["Read"])
+def get_attached_crate_status_by_id(unit_id: int):
+    '''
+    Return unit crate status 
+    '''
+    return attached_units_dict[unit_id].getCrateStatus()
+
 @app.get("/other_units/{unit_id}/status", tags=["Read"])
 def get_other_status_by_id(unit_id: int):
     '''
-    Return other unit status (i.e. {light, current, rtd})
+    Return other unit status (i.e. MPOD crate status)
     '''
     return others_dict[unit_id].getCrateStatus()
     
@@ -202,7 +210,8 @@ def turnON_other_by_id(unit_id: int):
     '''
     others_dict[unit_id].powerSwitch(1)
     # Continuous monitoring
-    threading.Thread(target=others_dict[unit_id].CONTINUOUS_monitoring, args=(), kwargs={}).start()
+    if others_dict[unit_id].getClass() != "MPOD":
+        threading.Thread(target=others_dict[unit_id].CONTINUOUS_monitoring, args=(), kwargs={}).start()
     # This will raise an error for the mpod crate!
     return {"message" : others_dict[unit_id].getOnMessage()} 
     
