@@ -70,7 +70,7 @@ const Card = ({ id, title, on_message, off_message }) => {
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     return (
       <div className={clicked ? 'card-off' : 'card-on'}>
-        <div style={{display : 'flex', justifyContent : 'space-between'}}>
+        <div style={{display : 'flex', justifyContent : 'space-between', width : '100%'}}>
           <div className="card-title">{title}</div>
           <div style={{marginTop : '8px', paddingRight : '8px'}}>
             <ThemeProvider theme={theme}>
