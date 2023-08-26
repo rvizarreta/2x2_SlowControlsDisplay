@@ -17,36 +17,19 @@ const theme = createTheme({
 })
 
 // COMPONENT FUNCTION
-function ModuleBox({ id, title, units }) {
+function ModuleBox({ id, title, units, crate_status, measuring }) {
 
-  const [data, setData] = useState([]);
-  const [buttonStatus, setButtonStatus] = useState();
-
-  // GETTING READOUTS STATUS JSON
-  const fetchStatus = () => {
-    // Getting status
-    fetch(`http://localhost:8000/attached_units/${id}/status`, {cache: 'no-cache'})
-    .then(response => response.json())
-    .then(dict => {
-      setData(dict);
-    })
-
-    fetch(`http://localhost:8000/attached_units/${id}/crate_status`, {cache: 'no-cache'})
-    .then(response => response.json())
-    .then(status => {
-      setButtonStatus(status);
-    })    
-  };
-
-  // Fetch the status initially and then set up polling
+  const [status, setStatus] = useState();
   useEffect(() => {
-    fetchStatus(); // Fetch initial status
-    // Set up polling every 10 seconds
-    const intervalId = setInterval(fetchStatus, 10000);
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, [id]);
-
+    setStatus(crate_status);
+    if (crate_status===true) {
+      console.log("it's true")
+    }
+    if (crate_status===false) {
+      console.log("it's false")
+    }
+  }, [crate_status]);
+  
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
   //# RETURN CARD
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
@@ -57,14 +40,12 @@ function ModuleBox({ id, title, units }) {
           <React.Fragment key={index}>
             <div className='unit-name'>{unitName.toUpperCase()}</div>
             <div>
-            {Object.keys(data).map((readoutName, index2) => (
-              console.log(readoutName),
-              console.log(index2),
+            {Object.keys(measuring).map((readoutName, index2) => (
               <React.Fragment key={index2}>
                 <Measuring id={id}
                            title={readoutName}
-                           status={Boolean(data[readoutName])}
-                           button_status={buttonStatus}/>
+                           status={Boolean(measuring[readoutName])}
+                           button_status={status}/>
                 <hr style={{margin : '0.5px'}}></hr>
               </React.Fragment>
             ))}  

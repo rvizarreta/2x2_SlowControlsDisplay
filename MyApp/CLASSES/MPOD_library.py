@@ -29,6 +29,9 @@ class MPOD(UNIT):
     def getOnMessage(self):
         return self.dictionary["on_message"]
     
+    def getModules(self):
+        return self.dictionary["modules"].keys()
+    
     def getClass(self):
         return self.dictionary["class"]
     
@@ -250,8 +253,7 @@ class MPOD(UNIT):
         Description:    Continuously record timestamp on InfluxDB
         '''
         try:
-            print("Continuous DAQ Activated")
-            print("Taking data in real time")
+            print("Continuous DAQ Activated: " + powering + ". Taking data in real time")
             while self.getCrateStatus():
                 data = self.measure(powering)
                 self.INFLUX_write(powering,data)

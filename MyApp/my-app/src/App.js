@@ -1,86 +1,113 @@
 import './App.css';
-//import react from 'react'
 import Header from './components/header';
 import Card from './components/card';
 import CardList from './components/cardlist';
 import ModuleBox from './components/modulebox';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
+// SETTING UP MAIN FUNCTION APP
 function App() {
-  const [othersNames, setOthersNames] = useState([]);
-  const [othersData, setOthersData] = useState([]);
-  const [modulesData, setModulesData] = useState([]);
 
-  // GETTING allothers JSON
-  useEffect(() => {
-    fetch("http://localhost:8000/allothers")
+  // CONTINUOS JSON AQUISITION OTHER UNITS
+  const [othersData2, setOthersData2] = React.useState([]);
+
+  const loadOthers = () => {
+    fetch("http://localhost:8000/other_units")
       .then(response => response.json())
       .then(data => {
         // Get response JSON
-        const others_names = Object.keys(data);
-        setOthersNames(others_names)
-        // Create othersData based on others_names,
-        const newOthersData = [];
-        for (let i = 0; i < others_names.length; i += 2) {
-          newOthersData.push([
+        const dict = Object.keys(data);
+        // Create modulesData based on modules_names,
+        const newOthersData2 = [];
+        for (let i = 0; i < dict.length; i += 2) {
+          newOthersData2.push([
             //console.log(JSON.stringify(othersNames.length))
             <Card id={i}
-                  title={others_names[i].toUpperCase()}
-                  on_message={data[others_names[i]]["on_message"]}
-                  off_message={data[others_names[i]]["off_message"]} />,
+                  title={data[i]["unit"].toUpperCase()}
+                  on_message={data[i]["dictionary"]["on_message"]}
+                  off_message={data[i]["dictionary"]["off_message"]}
+                  crate_status={data[i]["crate_status"]}/>,
             <Card id={i+1}
-                  title={others_names[i + 1].toUpperCase()}
-                  on_message={data[others_names[i+1]]["on_message"]}
-                  off_message={data[others_names[i+1]]["off_message"]} />,
+                  title={data[i+1]["unit"].toUpperCase()}
+                  on_message={data[i+1]["dictionary"]["on_message"]}
+                  off_message={data[i+1]["dictionary"]["off_message"]}
+                  crate_status={data[i+1]["crate_status"]}/>,
           ]);
-        
         }
-        setOthersData(newOthersData);
+        setOthersData2(newOthersData2);
       });
-  }, []);
+  }
 
-  // GETTING modules JSON
-  useEffect(() => {
-    fetch("http://localhost:8000/allmodules")
+  // CONTINUOS JSON AQUISITION ATTACHED UNITS
+  const [modulesData2, setModulesData2] = React.useState([]);
+
+  const loadAttached = () => {
+    fetch("http://localhost:8000/attached_units2")
       .then(response => response.json())
       .then(data => {
         // Get response JSON
-        const modules_names = Object.keys(data);
-        setOthersNames(modules_names)
+        const dict = Object.keys(data);
         // Create modulesData based on modules_names,
-        const newModulesData = [];
-        for (let i = 0; i < modules_names.length; i += 2) {
-          const numericPart = modules_names[i].match(/\d+/)[0]
+        const newModulesData2 = [];
+        for (let i = 0; i < dict.length; i += 2) {
+          const numericPart = dict[i].match(/\d+/)[0]
           const numericValue = parseInt(numericPart, 10)
           const formattedString = `Module ${numericValue}`;
-          newModulesData.push([
+          newModulesData2.push([
             <ModuleBox id={i}
                   title={formattedString}
-                  units={Object.keys(data[modules_names[i]])}/>,
+                  units={[data[dict[i]][i]["unit"]]}
+                  crate_status={data[dict[i]][i]["crate_status"]}
+                  measuring={data[dict[i]][i]["measuring_status"]}/>,
             //<ModuleBox id={i+1}
             //      title={modules_names[i + 1].toUpperCase()}/>,
           ]);
-        
+          console.log(JSON.stringify(newModulesData2, null, 2));
+          if (data[dict[i]][i]["crate_status"]===true) {
+            console.log("it's true")
+          }
+          if (data[dict[i]][i]["crate_status"]===false) {
+            console.log("it's false")
+          }
         }
-        setModulesData(newModulesData);
+        setModulesData2(newModulesData2);
       });
+  }
+
+  // Loading both JSON files from API
+  const loadData = () => {
+    loadOthers();
+    loadAttached();
+  };
+
+  // RELOAD JSON FILES EVERY 10 SECONDS
+  useEffect(() => {
+    // Fetch initial data
+    loadData(); 
+    // Set up polling every 10 seconds
+    const intervalId = setInterval(loadData, 10000);
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId);
   }, []);
 
-  return (
-    <div className="mother_container">
-      <Header />
-      <div className='title-container'>
-        <div className='modules_group'>
-          <div className='circle'>
-            <CardList cardData={modulesData}/>
+  //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+  //# RETURN DISPLAY
+  //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+    return (
+      <div className="mother_container">
+        <Header />
+        <div className='title-container'>
+          <div className='modules_group'>
+            <div className='circle'>
+              <CardList cardData={modulesData2}/>
+            </div>
+          </div>
+          <div className='other_units_group'>
+            <CardList cardData={othersData2}/>
           </div>
         </div>
-        <div className='other_units_group'>
-          <CardList cardData={othersData}/>
-        </div>
       </div>
-    </div>
-  )
+    )
 }
 
 export default App;

@@ -1,7 +1,7 @@
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FAST API PACKAGES
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.encoders import jsonable_encoder
 
@@ -28,12 +28,14 @@ with open('CONFIG/others_units.json', "r") as json_file:
 # Get list of units  attached to modules
 id = 0
 attached_units_dict = {}
+attached_units_dict2 = {}
 for module in moduleDB.keys():
     unit_names = moduleDB[module].keys()
     for unit in unit_names:
         kind = moduleDB[module][unit]["class"]
         object = classes_dictionary[kind]
         attached_units_dict[id] = object(module, unit, moduleDB[module][unit])
+        attached_units_dict2[module] = {id : object(module, unit, moduleDB[module][unit])}
         id += 1 
 
 id = 0
@@ -138,6 +140,14 @@ def get_attached_units():
     '''
     return attached_units_dict
 
+@app.get("/attached_units2", tags=["Read"])
+def get_attached_units2():
+    '''
+    Return all objects of units connected to modules
+    '''
+    return attached_units_dict2
+
+
 @app.get("/attached_units/{unit_id}", tags=["Read"])
 def get_attached_unit_by_id(unit_id: int):
     '''
@@ -209,6 +219,10 @@ def turnON_other_by_id(unit_id: int):
     Turn on unit NOT connected to module (i.e. MPOD Crate)
     '''
     others_dict[unit_id].powerSwitch(1)
+    modules = others_dict[unit_id].getModules()
+    for module in modules:
+        for id in attached_units_dict2[module].keys():
+            attached_units_dict2[module][id].powerSwitch(1)
     # Continuous monitoring
     if others_dict[unit_id].getClass() != "MPOD":
         threading.Thread(target=others_dict[unit_id].CONTINUOUS_monitoring, args=(), kwargs={}).start()
@@ -221,5 +235,8 @@ def turnOFF_other_by_id(unit_id: int):
     Turn off unit NOT connected to module (i.e. MPOD Crate)
     '''
     others_dict[unit_id].powerSwitch(0)
+    modules = others_dict[unit_id].getModules()
+    for module in modules:
+        for id in attached_units_dict2[module].keys():
+            attached_units_dict2[module][id].powerSwitch(0)
     return {"message" : others_dict[unit_id].getOffMessage()} 
-

@@ -19,42 +19,26 @@ const theme = createTheme({
   }
 })
 
-// COMPONENT FUNCTION
-const Card = ({ id, title, on_message, off_message }) => {
+// COMPONENT CONSTANT
+const Card = ({ id, title, on_message, off_message, crate_status }) => {
 
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
   //# BUTTON STATUS CONFIGURATION
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 
-  const [status, setStatus] = React.useState(false); // Initialize status
-  const [clicked, setClicked] = React.useState(false);
+  //const [status, setStatus] = React.useState(false); // Initialize status
+  const [clicked, setClicked] = React.useState();
   const handleClick = () => {
     setClicked((prevClicked) => !prevClicked);
     const endpoint = clicked ? `http://localhost:8000/other_units/${id}/turn-on` : `http://localhost:8000/other_units/${id}/turn-off`;
     fetch(endpoint, {method: "PUT"})
     .then(response => response.json())
     }
-  
-  const fetchStatus = () => {
-    // Getting status
-    fetch(`http://localhost:8000/other_units/${id}/status`, {cache: 'no-cache'})
-    .then(response => response.json())
-    .then(state => {
-      const parsedStatus = Boolean(state);
-      setStatus(!parsedStatus);
-      setClicked(!parsedStatus);
-    })
-  };
 
-  // Fetch the status initially and then set up polling
   useEffect(() => {
-    fetchStatus(); // Fetch initial status
-    // Set up polling every 10 seconds
-    const intervalId = setInterval(fetchStatus, 10000);
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(intervalId);
-  }, [id]);
-
+    setClicked(!crate_status);
+  }, [crate_status]);
+  
   const buttonStyle = {
     width: 82,
     height: 30,
@@ -64,7 +48,7 @@ const Card = ({ id, title, on_message, off_message }) => {
   if (off_message === "Disabled") {
     buttonStyle.color = "disabled";
   }
-
+  
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
   //# RETURN CARD
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
@@ -91,6 +75,6 @@ const Card = ({ id, title, on_message, off_message }) => {
         </p>
       </div>
     );
-  }
+  };
 
 export default Card;

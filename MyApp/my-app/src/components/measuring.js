@@ -16,13 +16,20 @@ const theme = createTheme({
     }
   })
 
+// COMPONENT CONSTANT
 const Measuring= ({ id, title, status, button_status }) => {
 
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
   //# BUTTON STATUS CONFIGURATION
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-  console.log(JSON.stringify(status))
   const [clicked, setClicked] = React.useState(!status);
+  
+  useEffect(() => {
+    if (button_status === false){
+      setClicked(!button_status);
+    }
+    
+  }, [button_status]);
 
   useEffect(() => {
     setClicked(!status);
@@ -41,6 +48,10 @@ const Measuring= ({ id, title, status, button_status }) => {
   const restOfWord = firstWord.slice(1);
   const newTitle = `${capitalizedFirstLetter}${restOfWord} readout`;
 
+  
+  //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+  //# RETURN MEASURING ROW
+  //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
   return (
       <div className={clicked ? 'measuring-row-off' : 'measuring-row-on'}>
         <div className='measuring'>

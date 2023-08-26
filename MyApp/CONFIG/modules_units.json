@@ -96,6 +96,28 @@
             "on_message" : "MPOD0 powering is on.",
             "off_message" : "MPOD0 powering is off."
         }
+    },
+    "module1" : {
+        "TTI-1" : {
+            "ip" : "192.168.196.32",
+            "class" : "TTI",
+            "sock_timeout_secs" : 60,
+            "port" : 9221,
+            "powering" : {
+                "voltage" : {
+                    "measurements" : ["voltage"],
+                    "channels" : {
+                        "1" : {
+                            "name" : "CHANNEL_1",
+                            "max_current" : 0.0075,
+                            "tripAmps" : 0.01,
+                            "tripVolts" : 110,
+                            "stepSizeVolts" : 1
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }
