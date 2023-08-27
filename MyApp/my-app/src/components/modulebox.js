@@ -22,12 +22,6 @@ function ModuleBox({ id, title, units, crate_status, measuring }) {
   const [status, setStatus] = useState();
   useEffect(() => {
     setStatus(crate_status);
-    if (crate_status===true) {
-      console.log("it's true")
-    }
-    if (crate_status===false) {
-      console.log("it's false")
-    }
   }, [crate_status]);
   
   //#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
@@ -38,7 +32,7 @@ function ModuleBox({ id, title, units, crate_status, measuring }) {
         <h2 className="module-title">{title}</h2>
         {units.map((unitName, index) => (
           <React.Fragment key={index}>
-            <div className='unit-name'>{unitName.toUpperCase()}</div>
+            <div className='unit-name'>{unitName.slice(0, -1).toUpperCase() + '-' + unitName.slice(-1).toUpperCase()}</div>
             <div>
             {Object.keys(measuring).map((readoutName, index2) => (
               <React.Fragment key={index2}>

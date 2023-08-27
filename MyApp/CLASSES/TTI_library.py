@@ -49,9 +49,11 @@ class TTI(UNIT):
     
     def getCrateStatus(self):
         try:
-            self.readOutputVolts(1)
+            #self.readOutputVolts(1)
+            self.crate_status = True
             return True
         except:
+            self.crate_status = False
             return False
     
     def getMeasuringStatus(self):
@@ -199,11 +201,11 @@ class TTI(UNIT):
             return False
         
         #	Test to ensure we can read voltages
-        try:
-            print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
-        except:
+        #try:
+        #    print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+        #except:
             #failure(ip)
-            return False
+        #    return False
         
         #   Sets max current to 7.5 mA
         self.setMaxAmps(self.dictionary["powering"]["voltage"]["channels"]["1"]["max_current"], channel)
@@ -213,13 +215,13 @@ class TTI(UNIT):
         self.setStepSizeVolts(self.dictionary["powering"]["voltage"]["channels"]["1"]["stepSizeVolts"], channel)
         #   Begins ramping up voltage
         if V0 > 6:
-            print("Starting Ramp")
+            #print("Starting Ramp")
             #   Slow at the beginning
             while self.readOutputVolts(channel) < 6:
                 #   Stops if incrimentation fails
                 try:
                     self.incrementVoltage(channel)
-                    print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+                    #print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
                     #write()
                 except:
                     #failure(ip)
@@ -239,7 +241,7 @@ class TTI(UNIT):
             while self.readOutputVolts(channel) < V0-fast_step:
                     try:    
                         self.incrementVoltage(channel)
-                        print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+                        #print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
                         #write()
                     except:
                         #failure(ip)
@@ -250,14 +252,14 @@ class TTI(UNIT):
                         return False
             
             self.setMaxVolts(channel, V0)
-            print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+            #print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
 
         #   If voltage is lower than threshold to speed up then just do normally
         elif V0 < 7: 
             while self.readOutputVolts(channel) < 7:
                 try:
                     self.incrementVoltage(channel)
-                    print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+                    #print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
                 except: 
                     #failure(ip)
                     break
@@ -269,7 +271,7 @@ class TTI(UNIT):
     def ramp_down(self, channel):
             
         #   Prints the voltage it starts at
-        print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+        #print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
         #write() 
         #   initializes the voltage step size to 1
         self.setStepSizeVolts(6, channel)
@@ -281,19 +283,38 @@ class TTI(UNIT):
                     self.setStepSizeVolts(1, channel)
                 except:
                 #    failure(ip)
-                    print(5)        
+                    print("Error ramping down")        
             try:
                 self.decrementVoltage(channel)
-                print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+                #print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
             except:
                 #failure(ip)
-                print(5) 
+                print("Error ramping down")  
             
         #   Sets voltage to zero and turns off output
         self.setMaxVolts(channel, 0)
-        print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
+        #print("The current Voltage is: " ,self.readOutputVolts(channel) ,"V")
         self.setOutputEnable(False, channel)
 
+    def powerON(self, powering):
+        '''
+        Power-ON all channels
+        '''
+        channels = self.getChannelDict(powering)
+        for channel in channels.keys():
+            selected_channel = channels[channel]
+            self.setOutputEnable(True, selected_channel)
+            #self.ramp_up(1)
+
+    def powerOFF(self, powering):
+        '''
+        Power-ON all channels
+        '''
+        channels = self.getChannelDict(powering)
+        for channel in channels.keys():
+            selected_channel = channels[channel]
+            self.ramp_down(1)
+            self.setOutputEnable(False, selected_channel)
    
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # INFLUXDB METHODS
@@ -349,7 +370,6 @@ class TTI(UNIT):
 
         Description:    Continuously record timestamp on InfluxDB
         '''
-        self.ramp_up(100,1)
         try:
             print("Continuous DAQ Activated: " + powering + ". Taking data in real time")
             while self.getCrateStatus():

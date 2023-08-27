@@ -98,7 +98,7 @@
         }
     },
     "module1" : {
-        "TTI-1" : {
+        "TTI1" : {
             "ip" : "192.168.196.32",
             "class" : "TTI",
             "sock_timeout_secs" : 60,
@@ -116,7 +116,9 @@
                         }
                     }
                 }
-            }
+            },
+            "on_message" : "TTI-1 voltage is on. Turn it off manually only.",
+            "off_message" : "TTI-1 voltage is off. Turn it on manually only."
         }
     }
 

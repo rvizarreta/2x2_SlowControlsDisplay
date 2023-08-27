@@ -52,23 +52,19 @@ function App() {
         for (let i = 0; i < dict.length; i += 2) {
           const numericPart = dict[i].match(/\d+/)[0]
           const numericValue = parseInt(numericPart, 10)
-          const formattedString = `Module ${numericValue}`;
+          //const formattedString = `Module ${numericValue}`;
           newModulesData2.push([
             <ModuleBox id={i}
-                  title={formattedString}
+                  title={`Module ${numericValue}`}
                   units={[data[dict[i]][i]["unit"]]}
                   crate_status={data[dict[i]][i]["crate_status"]}
                   measuring={data[dict[i]][i]["measuring_status"]}/>,
-            //<ModuleBox id={i+1}
-            //      title={modules_names[i + 1].toUpperCase()}/>,
-          ]);
-          console.log(JSON.stringify(newModulesData2, null, 2));
-          if (data[dict[i]][i]["crate_status"]===true) {
-            console.log("it's true")
-          }
-          if (data[dict[i]][i]["crate_status"]===false) {
-            console.log("it's false")
-          }
+            <ModuleBox id={i+1}
+            title={`Module ${numericValue+1}`}
+            units={[data[dict[i+1]][i+1]["unit"]]}
+            crate_status={data[dict[i+1]][i+1]["crate_status"]}
+            measuring={data[dict[i+1]][i+1]["measuring_status"]}/>,
+          ])
         }
         setModulesData2(newModulesData2);
       });

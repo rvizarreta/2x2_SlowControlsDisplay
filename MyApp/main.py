@@ -35,7 +35,7 @@ for module in moduleDB.keys():
         kind = moduleDB[module][unit]["class"]
         object = classes_dictionary[kind]
         attached_units_dict[id] = object(module, unit, moduleDB[module][unit])
-        attached_units_dict2[module] = {id : object(module, unit, moduleDB[module][unit])}
+        attached_units_dict2[module] = {id : attached_units_dict[id]}
         id += 1 
 
 id = 0
@@ -46,6 +46,9 @@ for unit in othersDB.keys():
     object = classes_dictionary[kind]
     others_dict[id] = object(None, unit, othersDB[unit])
     id += 1
+
+# Turn on gizmo when loading
+others_dict[0].CONTINUOUS_monitoring()
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FAST API CONFIGURATION
@@ -201,6 +204,8 @@ async def turnON_attached_by_id(unit_id: int, measuring: str):
     attached_units_dict[unit_id].powerON(measuring) 
     # Continuous monitoring
     threading.Thread(target=attached_units_dict[unit_id].CONTINUOUS_monitoring, args=([measuring]), kwargs={}).start()
+    if attached_units_dict[unit_id].getClass() == "TTI":
+        threading.Thread(target=attached_units_dict[unit_id].ramp_up(100,1), args=([measuring]), kwargs={}).start()
     return {"message" : attached_units_dict[unit_id].getOnMessage() + " Measuring: " + measuring} 
 
 #loop.create_task(turnON_attached_by_id)
@@ -219,11 +224,12 @@ def turnON_other_by_id(unit_id: int):
     Turn on unit NOT connected to module (i.e. MPOD Crate)
     '''
     others_dict[unit_id].powerSwitch(1)
-    modules = others_dict[unit_id].getModules()
-    for module in modules:
-        for id in attached_units_dict2[module].keys():
-            attached_units_dict2[module][id].powerSwitch(1)
-    # Continuous monitoring
+    if others_dict[unit_id].getClass() != "GIZMO":
+        modules = others_dict[unit_id].getModules()
+        for module in modules:
+            for id in attached_units_dict2[module].keys():
+                attached_units_dict2[module][id].powerSwitch(1)
+    # Continuous monitoring (don't measure from mpod crate)
     if others_dict[unit_id].getClass() != "MPOD":
         threading.Thread(target=others_dict[unit_id].CONTINUOUS_monitoring, args=(), kwargs={}).start()
     # This will raise an error for the mpod crate!

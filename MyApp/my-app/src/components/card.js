@@ -63,7 +63,7 @@ const Card = ({ id, title, on_message, off_message, crate_status }) => {
                         variant="contained"
                         style={buttonStyle}
                         onClick={handleClick}
-                        disabled={off_message === "Disabled"}>
+                        disabled={title === "GIZMO"}>
                         {clicked ? 'OFF' : 'ON'}
                 </Button>
               </div>

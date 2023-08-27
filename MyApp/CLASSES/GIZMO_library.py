@@ -113,11 +113,10 @@ class GIZMO(UNIT):
         Description:    Continuously record timestamp on InfluxDB
         '''
         powering_list = self.dictionary["powering"].keys()
-        try:
-            print('~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#')
-            print("Continuous DAQ Activated")
-            print("Taking data in real time")
-            while True:
+        print("Continuous DAQ Activated. Taking data in real time")
+
+        while self.crate_status:
+            try:
                 line = self.measure()
                 if 'RES' == line[0:3]:
                     line = line.replace('(', ' ')
@@ -130,12 +129,13 @@ class GIZMO(UNIT):
                     for powering, value in zip(powering_list, data):
                         print(powering,value)
                         self.INFLUX_write(powering, value)
-                
+                    self.crate_status = True
                     time.sleep(2)
 
-        except Exception as e:
-            print('*** Caught exception: %s: %s' % (e.__class__, e))
-            traceback.print_exc()
-            sys.exit(1)
+            except Exception as e:
+                self.crate_status = False
+                #print('*** Caught exception: %s: %s' % (e.__class__, e))
+                #traceback.print_exc()
+                #sys.exit(1)
 
             
