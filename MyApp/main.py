@@ -48,6 +48,7 @@ for unit in othersDB.keys():
     id += 1
 
 # Turn on gizmo when loading
+others_dict[0].makeConnection()
 others_dict[0].CONTINUOUS_monitoring()
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---

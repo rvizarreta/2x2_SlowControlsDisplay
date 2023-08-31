@@ -62,16 +62,19 @@ class GIZMO(UNIT):
     # MEASURING METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     def measure(self):
+        validation = True
         try:
-            while True:
-                time.sleep(2)
+            while validation:
+                #time.sleep(5)
                 line = self.chan.recv(1000).decode('ASCII').strip()
                 if 'RES' == line[0:3]:
-                    break
-            return line
-                    
+                    validation = False
+    
         except Exception as e:
             print("SSH Connection Error")
+        
+        return line
+
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # INFLUXDB METHODS
@@ -118,6 +121,7 @@ class GIZMO(UNIT):
         while self.crate_status:
             try:
                 line = self.measure()
+                #line = self.chan.recv(1000).decode('ASCII').strip()
                 if 'RES' == line[0:3]:
                     line = line.replace('(', ' ')
                     line = line.replace(')', ' ')
@@ -127,10 +131,8 @@ class GIZMO(UNIT):
                     data = [float(sl[i].split('=')[1]) for i in range(0,5)]
                 
                     for powering, value in zip(powering_list, data):
-                        print(powering,value)
                         self.INFLUX_write(powering, value)
                     self.crate_status = True
-                    time.sleep(2)
 
             except Exception as e:
                 self.crate_status = False
