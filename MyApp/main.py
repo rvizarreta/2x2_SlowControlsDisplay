@@ -47,9 +47,8 @@ for unit in othersDB.keys():
     others_dict[id] = object(None, unit, othersDB[unit])
     id += 1
 
-# Turn on gizmo when loading
-others_dict[0].makeConnection()
-others_dict[0].CONTINUOUS_monitoring()
+# REMOTE MONITORING FOR GIZMO
+threading.Thread(target=others_dict[0].CONTINUOUS_monitoring, args=(), kwargs={}).start()
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FAST API CONFIGURATION
@@ -197,6 +196,7 @@ def get_other_status_by_id(unit_id: int):
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # PUT METHODS
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
+import time
 @app.put("/attached_units/{unit_id}/{measuring}/turn-on", tags=["Update"])
 async def turnON_attached_by_id(unit_id: int, measuring: str):
     '''
@@ -224,18 +224,18 @@ def turnON_other_by_id(unit_id: int):
     '''
     Turn on unit NOT connected to module (i.e. MPOD Crate)
     '''
+    # REMOTE MONITORING FOR MPOD CRATE
     others_dict[unit_id].powerSwitch(1)
     if others_dict[unit_id].getClass() != "GIZMO":
         modules = others_dict[unit_id].getModules()
         for module in modules:
             for id in attached_units_dict2[module].keys():
                 attached_units_dict2[module][id].powerSwitch(1)
-    # Continuous monitoring (don't measure from mpod crate)
-    if others_dict[unit_id].getClass() != "MPOD":
-        threading.Thread(target=others_dict[unit_id].CONTINUOUS_monitoring, args=(), kwargs={}).start()
+
     # This will raise an error for the mpod crate!
     return {"message" : others_dict[unit_id].getOnMessage()} 
-    
+
+
 @app.put("/other_units/{unit_id}/turn-off", tags=["Update"])
 def turnOFF_other_by_id(unit_id: int):
     '''

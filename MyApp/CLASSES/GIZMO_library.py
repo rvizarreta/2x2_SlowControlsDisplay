@@ -20,9 +20,12 @@ class GIZMO(UNIT):
 
         super().__init__(module, unit)
         self.dictionary = dict_unit
-        self.client = None
-        self.chan = None
         self.crate_status = self.getCrateStatus()
+        # These two have been commented for documentation purposes because Paramiko returns
+        # a particular kind of object that is not available with 
+        # utf-8 encoding. 
+        #self.client = None
+        #self.chan = None
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # GET METHODS
@@ -42,31 +45,18 @@ class GIZMO(UNIT):
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # CONFIGURATION METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-    def makeConnection(self):
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(self.dictionary["host-name"], self.dictionary["port"], self.dictionary["username"], self.dictionary["password"], timeout=200)
-        chan = client.invoke_shell()
-        chan.send('./GIZMO.elf 1\n')
-        self.client = client
-        self.chan = chan
-    
-    def stopMeasuring(self):
-        self.chan.close()
-        self.client.close()
-
     def powerSwitch(self, switch):
         return None
 
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
     # MEASURING METHODS
     #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-    def measure(self):
+    def measure(self, chan):
         validation = True
         try:
             while validation:
                 #time.sleep(5)
-                line = self.chan.recv(1000).decode('ASCII').strip()
+                line = chan.recv(1000).decode('ASCII').strip()
                 if 'RES' == line[0:3]:
                     validation = False
     
@@ -118,10 +108,18 @@ class GIZMO(UNIT):
         powering_list = self.dictionary["powering"].keys()
         print("Continuous DAQ Activated. Taking data in real time")
 
+        # Setting up GIZMO client
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(self.dictionary["host-name"], self.dictionary["port"], self.dictionary["username"], self.dictionary["password"], timeout=200)
+        chan = client.invoke_shell()
+        chan.send('./GIZMO.elf 1\n')
+
         while self.crate_status:
             try:
-                line = self.measure()
-                #line = self.chan.recv(1000).decode('ASCII').strip()
+                time.sleep(2)
+                line = self.measure(chan)
+                #li= self.chan.recv(1000).decode('ASCII').strip()
                 if 'RES' == line[0:3]:
                     line = line.replace('(', ' ')
                     line = line.replace(')', ' ')
@@ -136,7 +134,9 @@ class GIZMO(UNIT):
 
             except Exception as e:
                 self.crate_status = False
-                #print('*** Caught exception: %s: %s' % (e.__class__, e))
+                print('*** Caught exception: %s: %s' % (e.__class__, e))
+                chan.close()
+                client.close()
                 #traceback.print_exc()
                 #sys.exit(1)
 

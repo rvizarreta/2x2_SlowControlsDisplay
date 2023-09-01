@@ -49,7 +49,7 @@ class TTI(UNIT):
     
     def getCrateStatus(self):
         try:
-            #self.readOutputVolts(1)
+            self.readOutputVolts(1)
             self.crate_status = True
             return True
         except:
@@ -60,9 +60,12 @@ class TTI(UNIT):
         self.measuring_status = {}
         for key in self.dictionary['powering'].keys():
             channels = self.getChannelDict(key)
-            if self.getOutputIsEnabled(list(channels)[0]):
-                self.measuring_status[key] = True 
-            else:
+            try:
+                if self.getOutputIsEnabled(list(channels)[0]):
+                    self.measuring_status[key] = True 
+                else:
+                    self.measuring_status[key] = False
+            except:
                 self.measuring_status[key] = False
         return self.measuring_status
     
