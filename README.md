@@ -11,15 +11,8 @@ This repository contains the code used for setting up the slow controls monitori
 - Working on python virtual environment venv that contains influxdb and pysnmp (do pip install for these).
 
 ## The Architecture:
-Previous working flow to generate configuration report.
 
-![image](https://github.com/rvizarreta/Mx2_SlowControlsDisplay/assets/34606228/b353d354-c0cf-4b98-919e-41a0cacbf8e8)
-
-New working flow considering Grafana display for continuous monitoring.
-
-![image](https://github.com/rvizarreta/Mx2_SlowControlsDisplay/assets/34606228/b9eefee5-8374-489e-a313-44ffa20da7d0)
-
-Using approach from above, I propose the new architecture for the Slow Controls GUI:
+This is the architecture for the Slow Controls GUI:
 
 ![image](https://github.com/rvizarreta/Mx2_SlowControlsDisplay/assets/34606228/5ad2391b-7a69-4a3b-a731-de15dd602a69)
 
