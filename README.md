@@ -1,4 +1,4 @@
-# Mx2_SlowControlsDisplay
+# 2x2_SlowControlsDisplay
 
 This repository contains the code used for setting up the slow controls monitoring system for Mx2. 
 
