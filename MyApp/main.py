@@ -8,9 +8,10 @@ from fastapi.encoders import jsonable_encoder
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # INTERNAL MANAGEMENT CLASSES
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
-from CLASSES.MPOD_library import MPOD
-from CLASSES.MPOD_library import UNIT
-from CLASSES.dictionary import classes_dictionary
+# Remove app. if running it out of the docker container
+from app.CLASSES.MPOD_library import MPOD
+from app.CLASSES.MPOD_library import UNIT
+from app.CLASSES.dictionary import classes_dictionary
 import json
 import threading
 
@@ -18,11 +19,11 @@ import threading
 # GENERATING OBJECT MODELS
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # Reading modules JSON file
-with open('CONFIG/modules_units.json', "r") as json_file:
+with open('app/CONFIG/modules_units.json', "r") as json_file:
     moduleDB = json.load(json_file)
 
 # Reading other units JSON file
-with open('CONFIG/others_units.json', "r") as json_file:
+with open('app/CONFIG/others_units.json', "r") as json_file:
     othersDB = json.load(json_file)
 
 # Get list of units  attached to modules
@@ -48,7 +49,7 @@ for unit in othersDB.keys():
     id += 1
 
 # REMOTE MONITORING FOR GIZMO
-threading.Thread(target=others_dict[0].CONTINUOUS_monitoring, args=(), kwargs={}).start()
+#threading.Thread(target=others_dict[0].CONTINUOUS_monitoring, args=(), kwargs={}).start()
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FAST API CONFIGURATION

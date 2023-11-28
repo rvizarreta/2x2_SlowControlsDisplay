@@ -27,11 +27,11 @@ function App() {
                   on_message={data[i]["dictionary"]["on_message"]}
                   off_message={data[i]["dictionary"]["off_message"]}
                   crate_status={data[i]["crate_status"]}/>,
-            <Card id={i+1}
-                  title={data[i+1]["unit"].toUpperCase()}
-                  on_message={data[i+1]["dictionary"]["on_message"]}
-                  off_message={data[i+1]["dictionary"]["off_message"]}
-                  crate_status={data[i+1]["crate_status"]}/>,
+            //<Card id={i+1}
+            //      title={data[i+1]["unit"].toUpperCase()}
+            //      on_message={data[i+1]["dictionary"]["on_message"]}
+            //      off_message={data[i+1]["dictionary"]["off_message"]}
+            //      crate_status={data[i+1]["crate_status"]}/>,
           ]);
         }
         setOthersData2(newOthersData2);

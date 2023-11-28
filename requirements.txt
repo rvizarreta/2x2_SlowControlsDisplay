@@ -1,4 +1,8 @@
-fastapi
 pydantic
 uvicorn
 influxdb
+fastapi
+pysnmp
+numpy
+paramiko
+email-validator

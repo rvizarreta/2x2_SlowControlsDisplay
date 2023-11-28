@@ -2,7 +2,7 @@
 # Source: https://fastapi.tiangolo.com/deployment/docker/#build-a-docker-image-for-fastapi
 
 # Start from the oficial Python base image
-FROM python:3.9
+FROM python:3.10
 
 # Set the current working directory to /code.
 # This is where we'll put the requirements.txt file and the MyApp directory.
@@ -24,4 +24,4 @@ COPY ./MyApp /code/app
 
 # Set the command to run the uvicorn server.
 # CMD takes a list of strings, each of these strings is what you would type in the command line separated by spaces.
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
