@@ -32,9 +32,10 @@ class UNIT():
         Create InfluxDB client
         '''
         conf = ConfigParser()
-        conf.read("CONFIG/config.ini")
+        conf.read("app/CONFIG/config.ini")
         db = conf["DATABASE"]
-        client = InfluxDBClient('localhost', db.get('PORT'), self.unit) 
+        # Run hostname -I to get local ip addresses
+        client = InfluxDBClient('172.24.0.1', db.get('PORT'), self.unit)
         if self.module == None:
             db_name = self.unit
         else:

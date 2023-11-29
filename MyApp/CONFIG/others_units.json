@@ -1,7 +1,7 @@
 {
     "gizmo" : {
         "class" : "GIZMO",
-        "host-name" : "minos-gizmo00",
+        "host-name" : "192.168.197.30",
         "username" : "root",
         "password" : "",
         "port" : 22,

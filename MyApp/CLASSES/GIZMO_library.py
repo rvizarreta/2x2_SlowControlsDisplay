@@ -127,12 +127,13 @@ class GIZMO(UNIT):
                     line = line.replace(', ', ' ')
                     sl = line.split() # split line
                     data = [float(sl[i].split('=')[1]) for i in range(0,5)]
-                
+                    print(data)
                     for powering, value in zip(powering_list, data):
                         self.INFLUX_write(powering, value)
                     self.crate_status = True
 
             except Exception as e:
+                print("Something is wrong!")
                 self.crate_status = False
                 print('*** Caught exception: %s: %s' % (e.__class__, e))
                 chan.close()

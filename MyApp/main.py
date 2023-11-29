@@ -49,7 +49,7 @@ for unit in othersDB.keys():
     id += 1
 
 # REMOTE MONITORING FOR GIZMO
-#threading.Thread(target=others_dict[0].CONTINUOUS_monitoring, args=(), kwargs={}).start()
+threading.Thread(target=others_dict[0].CONTINUOUS_monitoring, args=(), kwargs={}).start()
 
 #---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---#---
 # FAST API CONFIGURATION
@@ -87,6 +87,7 @@ tags_metadata = [
 """
 }
 ]
+
 app = FastAPI(
     title = "SlowControlsApp",
     description = description,
@@ -98,6 +99,7 @@ app = FastAPI(
         "email" : "rvizarr@fnal.gov",
     }
 )
+
 # Adding cors headers
 from fastapi.middleware.cors import CORSMiddleware
 # Adding cors urls
